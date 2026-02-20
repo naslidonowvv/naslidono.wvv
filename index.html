@@ -2,30 +2,1356 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Nasli Dono</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS — полная версия с профилем и аватаром</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Базовые стили (как в предыдущей версии) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
         body {
-            font-family: Arial;
-            background: #f0f2f5;
-            text-align: center;
-            padding: 50px;
+            background: #f4f7fc;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px 16px;
         }
-        h1 {
-            color: #2c3e50;
+
+        .app-container {
+            max-width: 1300px;
+            width: 100%;
         }
-        .card {
+
+        .auth-container {
+            max-width: 450px;
+            margin: 40px auto;
             background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #eef2f6;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #6f8a9f;
+        }
+
+        .auth-tab.active {
+            color: #1e2f4d;
+            border-bottom: 3px solid #1e2f4d;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .auth-input {
+            border: 2px solid #cbdae9;
+            border-radius: 40px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .auth-input:focus {
+            border-color: #1e2f4d;
+        }
+
+        .auth-btn {
+            background: #1e2f4d;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .auth-btn-google {
+            background: white;
+            color: #444;
+            border: 1px solid #cbdae9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .auth-link {
+            text-align: center;
+            color: #336699;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #336699;
+            cursor: pointer;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 32px;
+            padding: 24px 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            border: 1px solid #eef2f6;
+            height: fit-content;
+            position: relative;
+        }
+
+        .user-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f5fa;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: #1e2f4d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info h4 {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .user-info p {
+            font-size: 0.85rem;
+            color: #6f8a9f;
+            text-transform: capitalize;
+        }
+        .username-static {
+            background: #eef3f8;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: #1e2f4d;
+            margin-top: 4px;
             display: inline-block;
+        }
+
+        .nav-section {
+            margin-bottom: 28px;
+        }
+
+        .nav-caption {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8a9fb0;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            color: #2a4059;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: 0.1s;
+            cursor: pointer;
+        }
+        .nav-item i {
+            width: 22px;
+            color: #6b8dab;
+        }
+        .nav-item.active-nav {
+            background: #eef6ff;
+            color: #1e2f4d;
+            font-weight: 600;
+        }
+        .nav-item.active-nav i {
+            color: #1e2f4d;
+        }
+
+        .profile-nav-item {
+            margin-top: 20px;
+            border-top: 2px solid #f0f5fa;
+            padding-top: 20px;
+        }
+
+        .main-panel {
+            background: white;
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        .panel-header h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #0e2238;
+        }
+        .restriction-tag {
+            background: #fdf2e0;
+            color: #9e6d3b;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .hw-card, .grade-card {
+            background: #fafdff;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #e2ebf3;
+        }
+
+        .hw-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        .hw-meta {
+            display: flex;
+            gap: 12px;
+            color: #627d98;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        .hw-desc {
+            color: #2e4059;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }
+        .attachments {
+            display: flex;
+            gap: 12px;
+            color: #3f5e7a;
+            font-size: 0.9rem;
+        }
+        .subject-badge {
+            background: #e3eef9;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .subject-badge.english {
+            background: #e1f0fa;
+            color: #1a5a8c;
+        }
+        .subject-badge.russian {
+            background: #f0e7fa;
+            color: #6b4f8c;
+        }
+
+        .grade-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e2f4d;
+        }
+
+        .btn-primary {
+            background: #1e2f4d;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            border: 1px solid #1e2f4d;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            background: #2b405e;
+        }
+        .btn-ghost {
+            border: 1px solid #cbdae9;
+            background: white;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #1e2f4d;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-ghost:hover {
+            background: #f0f5fc;
+        }
+
+        .group-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e7edf4;
+        }
+
+        .group-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .group-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .group-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .edit-icon, .delete-icon, .unassign-icon {
+            color: #336699;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        .delete-icon { color: #b55a5a; }
+        .unassign-icon { color: #cc7b2b; }
+        .edit-icon:hover { background: #e3eef9; }
+        .delete-icon:hover { background: #ffe6e6; }
+        .unassign-icon:hover { background: #fff0e0; }
+
+        .edit-input {
+            border: 2px solid #cbdae9;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            width: 250px;
+            outline: none;
+        }
+
+        .edit-input:focus {
+            border-color: #1e2f4d;
+        }
+
+        .save-btn {
+            background: #1e2f4d;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .cancel-btn {
+            background: #eef3f8;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        .badge-limit {
+            background: #eef3f8;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .super-bar {
+            background: #f8f2e9;
+            border-radius: 20px;
+            padding: 16px 24px;
+            margin-top: 24px;
+            border-left: 5px solid #8a6e4b;
+        }
+
+        .language-stats {
+            display: flex;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .lang-stat {
+            background: #f5f9ff;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+        }
+
+        .admin-card {
+            background: #fafdff;
+            border-radius: 24px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e2ebf3;
+        }
+
+        .input-small {
+            border: 2px solid #cbdae9;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            width: 200px;
+            outline: none;
+        }
+        .input-small:focus {
+            border-color: #1e2f4d;
+        }
+        .action-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            background: #f5f9ff;
+            padding: 20px;
+            border-radius: 28px;
+        }
+
+        .logout-btn {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f4fa;
+            border-radius: 40px;
+            text-align: center;
+            cursor: pointer;
+            color: #b55a5a;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #8a9fb0;
+            font-size: 1.1rem;
+            background: #f9fcff;
+            border-radius: 32px;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #1e2f4d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            margin: 0 auto 20px;
+            overflow: hidden;
+        }
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .file-input {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .password-form {
+            max-width: 400px;
+            margin: 30px auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>📘 Онлайн дневник Nasli Dono</h1>
-        <p>Сайт успешно запущен на GitHub Pages!</p>
-    </div>
+<div class="app-container" id="appContainer">
+    <!-- Сюда будет рендериться или аутентификация, или основное приложение -->
+</div>
+
+<script>
+    (function() {
+        // ================== Инициализация хранилища ==================
+        const STORAGE_USERS = 'lms_users';
+        const STORAGE_CURRENT_USER = 'lms_current_user';
+        const STORAGE_GROUPS = 'lms_groups';
+        const STORAGE_HOMEWORK = 'lms_homework';
+        const STORAGE_GRADES = 'lms_grades';
+
+        // Начальные пользователи (с полем avatar)
+        const defaultUsers = [
+            { username: 'toirov', password: '111', email: 'toirov@example.com', role: 'super', name: 'Тоиров', avatar: null },
+            { username: 'petrov', password: '111', email: 'petrov@example.com', role: 'admin', name: 'Петров А.И.', avatar: null },
+            { username: 'sokolova', password: '111', email: 'sokolova@example.com', role: 'teacher', name: 'Соколова М.И.', avatar: null },
+            { username: 'ivanov', password: '111', email: 'ivanov@example.com', role: 'student', name: 'Иванов И.', avatar: null },
+        ];
+
+        // Начальные группы
+        const defaultGroups = [
+            { id: 1, name: 'English Intermediate', language: 'Английский', teacher: null, studentsCount: 0, students: [] },
+            { id: 2, name: 'English Advanced', language: 'Английский', teacher: null, studentsCount: 0, students: [] },
+            { id: 3, name: 'Русский язык (носители)', language: 'Русский', teacher: null, studentsCount: 0, students: [] },
+            { id: 4, name: 'Русский как иностранный', language: 'Русский', teacher: null, studentsCount: 0, students: [] },
+        ];
+
+        const defaultHomework = [];
+        const defaultGrades = [];
+
+        // Загрузка данных из localStorage
+        function loadUsers() {
+            const stored = localStorage.getItem(STORAGE_USERS);
+            if (stored) return JSON.parse(stored);
+            localStorage.setItem(STORAGE_USERS, JSON.stringify(defaultUsers));
+            return defaultUsers;
+        }
+
+        function loadGroups() {
+            const stored = localStorage.getItem(STORAGE_GROUPS);
+            if (stored) return JSON.parse(stored);
+            localStorage.setItem(STORAGE_GROUPS, JSON.stringify(defaultGroups));
+            return defaultGroups;
+        }
+
+        function loadHomework() {
+            const stored = localStorage.getItem(STORAGE_HOMEWORK);
+            if (stored) return JSON.parse(stored);
+            localStorage.setItem(STORAGE_HOMEWORK, JSON.stringify(defaultHomework));
+            return defaultHomework;
+        }
+
+        function loadGrades() {
+            const stored = localStorage.getItem(STORAGE_GRADES);
+            if (stored) return JSON.parse(stored);
+            localStorage.setItem(STORAGE_GRADES, JSON.stringify(defaultGrades));
+            return defaultGrades;
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
+        }
+
+        function saveGroups(groups) {
+            localStorage.setItem(STORAGE_GROUPS, JSON.stringify(groups));
+        }
+
+        function saveHomework(hw) {
+            localStorage.setItem(STORAGE_HOMEWORK, JSON.stringify(hw));
+        }
+
+        function saveGrades(grades) {
+            localStorage.setItem(STORAGE_GRADES, JSON.stringify(grades));
+        }
+
+        function getCurrentUser() {
+            const stored = localStorage.getItem(STORAGE_CURRENT_USER);
+            return stored ? JSON.parse(stored) : null;
+        }
+
+        function setCurrentUser(user) {
+            localStorage.setItem(STORAGE_CURRENT_USER, JSON.stringify(user));
+        }
+
+        function clearCurrentUser() {
+            localStorage.removeItem(STORAGE_CURRENT_USER);
+        }
+
+        // Вспомогательная функция для получения имени учителя по username (для отображения)
+        function getTeacherNameByUsername(username) {
+            if (!username) return null;
+            const users = loadUsers();
+            const teacher = users.find(u => u.username === username && u.role === 'teacher');
+            return teacher ? (teacher.name || teacher.username) : null;
+        }
+
+        // Для демо уведомлений
+        function demoAlert(message) {
+            alert(message);
+        }
+
+        // ================== Состояние интерфейса ==================
+        let editingGroupId = null;
+        let editValue = '';
+        let currentMode = 'main'; // 'main' или 'profile'
+
+        // ================== Рендеринг основной части ==================
+        function renderApp(user) {
+            const container = document.getElementById('appContainer');
+            let html = '';
+
+            // Боковая панель общая для всех ролей, но контент зависит от роли и режима
+            html = `
+                <div class="content-grid">
+                    <div class="sidebar">
+                        <div class="user-title" id="profileClick">
+                            <div class="avatar">
+                                ${user.avatar ? `<img src="${user.avatar}" alt="avatar">` : (user.name ? user.name[0] : user.username[0]).toUpperCase()}
+                            </div>
+                            <div class="user-info">
+                                <h4>${user.name || user.username}</h4>
+                                <p>${user.role === 'super' ? 'супер‑админ 🔒' : user.role}</p>
+                                <div class="username-static">@${user.username} (нельзя изменить)</div>
+                            </div>
+                        </div>
+
+                        <!-- Навигационные пункты в зависимости от роли -->
+                        <div class="nav-section" id="roleNav">
+                            ${renderNavItems(user)}
+                        </div>
+
+                        <!-- Пункт профиля (всегда виден) -->
+                        <div class="nav-item profile-nav-item ${currentMode === 'profile' ? 'active-nav' : ''}" id="profileNav">
+                            <i class="fas fa-user-circle"></i> Профиль
+                        </div>
+
+                        <div class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</div>
+                    </div>
+                    <div class="main-panel">
+                        ${currentMode === 'profile' ? renderProfile(user) : renderMainContent(user)}
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            attachAppListeners(user);
+        }
+
+        function renderNavItems(user) {
+            if (user.role === 'super') {
+                return `
+                    <div class="nav-item ${currentMode === 'main' ? 'active-nav' : ''}" data-mode="main" id="navMain"><i class="fas fa-users-cog"></i> Администраторы</div>
+                `;
+            } else if (user.role === 'admin') {
+                return `
+                    <div class="nav-item ${currentMode === 'main' ? 'active-nav' : ''}" data-mode="main" id="navMain"><i class="fas fa-layer-group"></i> Группы</div>
+                `;
+            } else if (user.role === 'teacher') {
+                return `
+                    <div class="nav-item ${currentMode === 'main' ? 'active-nav' : ''}" data-mode="main" id="navMain"><i class="fas fa-chalkboard-teacher"></i> Занятия</div>
+                `;
+            } else if (user.role === 'student') {
+                return `
+                    <div class="nav-item ${currentMode === 'main' ? 'active-nav' : ''}" data-mode="main" id="navMain"><i class="fas fa-book-open"></i> Дневник</div>
+                `;
+            }
+        }
+
+        function renderMainContent(user) {
+            if (user.role === 'super') {
+                return renderSuperMain(user);
+            } else if (user.role === 'admin') {
+                return renderAdminMain(user);
+            } else if (user.role === 'teacher') {
+                return renderTeacherMain(user);
+            } else if (user.role === 'student') {
+                return renderStudentMain(user);
+            }
+        }
+
+        function renderSuperMain(user) {
+            const users = loadUsers();
+            const admins = users.filter(u => u.role === 'admin');
+            return `
+                <div class="panel-header">
+                    <h2>Управление администраторами</h2>
+                    <span class="restriction-tag"><i class="fas fa-crown"></i> ${user.username}</span>
+                </div>
+
+                <div class="action-row">
+                    <i class="fas fa-user-plus"></i>
+                    <span style="font-weight:600;">Назначить админа по имени пользователя:</span>
+                    <input type="text" class="input-small" id="superNewAdmin" placeholder="Введите username">
+                    <button class="btn-primary" id="superAssignBtn"><i class="fas fa-check"></i> Назначить</button>
+                </div>
+
+                <h3 style="margin-bottom: 20px;">Существующие администраторы</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${admins.map(a => `
+                        <div class="admin-card">
+                            <div><strong>${a.name || a.username}</strong> <span style="color:#6a8aaa;">(@${a.username})</span></div>
+                            <div style="display: flex; gap: 12px;">
+                                <i class="fas fa-edit" style="color:#336699; cursor:pointer;" onclick="window.editAdmin('${a.username}')"></i>
+                                <i class="fas fa-trash-alt" style="color:#b55a5a; cursor:pointer;" onclick="window.deleteAdmin('${a.username}')"></i>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="super-bar">
+                    <i class="fas fa-info-circle"></i> Только назначение по имени пользователя. Никаких списков других пользователей.
+                </div>
+            `;
+        }
+
+        function renderAdminMain(user) {
+            const groups = loadGroups();
+            const users = loadUsers();
+            return `
+                <div class="panel-header">
+                    <h2>Группы</h2>
+                    <span class="restriction-tag"><i class="fas fa-pen"></i> управление группами</span>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <button class="btn-primary" id="createGroupBtn"><i class="fas fa-plus"></i> Создать группу</button>
+                </div>
+
+                <div class="action-row">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span style="font-weight:600;">Назначить учителя на группу по имени:</span>
+                    <select class="input-small" id="adminGroupSelect">
+                        ${groups.map(g => `<option value="${g.id}">${g.name}</option>`).join('')}
+                    </select>
+                    <input type="text" class="input-small" id="adminTeacherName" placeholder="Username учителя">
+                    <button class="btn-primary" id="assignTeacherBtn"><i class="fas fa-check"></i> Назначить</button>
+                </div>
+
+                <div class="language-stats">
+                    <div class="lang-stat">🇬🇧 Английский: ${groups.filter(g => g.language === 'Английский').length}</div>
+                    <div class="lang-stat">🇷🇺 Русский: ${groups.filter(g => g.language === 'Русский').length}</div>
+                </div>
+                
+                <div>
+                    ${groups.map(g => {
+                        if (editingGroupId === g.id) {
+                            return `
+                                <div class="group-row">
+                                    <div class="group-info" style="width: 100%;">
+                                        <input type="text" class="edit-input" id="editInput_${g.id}" value="${editValue || g.name}" placeholder="Название группы">
+                                        <span class="subject-badge ${g.language === 'Английский' ? 'english' : 'russian'}">${g.language}</span>
+                                    </div>
+                                    <div class="group-actions">
+                                        <button class="save-btn" onclick="window.saveGroupName(${g.id})">Сохранить</button>
+                                        <button class="cancel-btn" onclick="window.cancelEdit()">Отмена</button>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            const teacherName = g.teacher ? (users.find(u => u.username === g.teacher)?.name || g.teacher) : 'не назначен';
+                            return `
+                                <div class="group-row">
+                                    <div class="group-info">
+                                        <span class="group-name">${g.name}</span>
+                                        <span class="subject-badge ${g.language === 'Английский' ? 'english' : 'russian'}">${g.language}</span>
+                                        <span class="badge-limit">👥 ${g.studentsCount} уч.</span>
+                                        <span class="badge-limit">👨‍🏫 ${teacherName}</span>
+                                    </div>
+                                    <div class="group-actions">
+                                        ${g.teacher ? `<i class="fas fa-user-slash unassign-icon" onclick="window.unassignTeacher(${g.id})" title="Удалить учителя"></i>` : ''}
+                                        <i class="fas fa-edit edit-icon" onclick="window.startEdit(${g.id}, '${g.name}')" title="Изменить название"></i>
+                                        <i class="fas fa-trash-alt delete-icon" onclick="window.deleteGroup(${g.id})" title="Удалить группу"></i>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }).join('')}
+                </div>
+                
+                <footer class="role-rules">
+                    <span>✅ Создаёт, редактирует, удаляет группы</span>
+                    <span>✅ Назначает/удаляет учителей по username</span>
+                </footer>
+            `;
+        }
+
+        function renderTeacherMain(user) {
+            const groups = loadGroups();
+            const teacherGroups = groups.filter(g => g.teacher === user.username);
+            const homework = loadHomework().filter(h => h.teacher === user.username);
+            return `
+                <div class="panel-header">
+                    <h2>Мои занятия</h2>
+                    <span class="restriction-tag"><i class="fas fa-plus"></i> макс. 5 групп</span>
+                </div>
+
+                <div style="display: flex; gap: 16px; margin-bottom: 30px; flex-wrap: wrap;">
+                    <button class="btn-primary" id="createHwBtn"><i class="fas fa-plus"></i> Создать ДЗ</button>
+                    <button class="btn-ghost" id="setGradeBtn"><i class="fas fa-star"></i> Поставить оценку</button>
+                </div>
+
+                <div class="action-row">
+                    <i class="fas fa-user-plus"></i>
+                    <span style="font-weight:600;">Добавить ученика в группу по имени:</span>
+                    <select class="input-small" id="teacherGroupSelect">
+                        ${teacherGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('')}
+                    </select>
+                    <input type="text" class="input-small" id="teacherStudentName" placeholder="Username ученика">
+                    <button class="btn-primary" id="addStudentBtn"><i class="fas fa-check"></i> Добавить</button>
+                </div>
+
+                <h3>Домашние задания</h3>
+                ${homework.length === 0 ? 
+                    '<div class="empty-message">У вас пока нет созданных домашних заданий.</div>' : 
+                    `<div class="grid-cards">
+                        ${homework.map(h => `
+                            <div class="hw-card">
+                                <div class="hw-title">${h.title}</div>
+                                <div class="hw-meta">
+                                    <span class="subject-badge english">${h.subject}</span>
+                                    <span>⏰ ${h.deadline}</span>
+                                </div>
+                                <div class="hw-desc">${h.desc}</div>
+                                <div class="attachments">
+                                    ${h.attachments?.includes('file') ? '<i class="fas fa-file"></i>' : ''}
+                                    ${h.attachments?.includes('audio') ? '<i class="fas fa-headphones"></i>' : ''}
+                                    ${h.attachments?.includes('photo') ? '<i class="fas fa-image"></i>' : ''}
+                                    <span style="margin-left: auto;">👥 ${h.group}</span>
+                                </div>
+                                <div style="margin-top: 12px;">
+                                    <button class="btn-ghost" style="padding: 4px 12px;" onclick="demoAlert('Редактировать ДЗ')">✎ Ред.</button>
+                                    <button class="btn-ghost" style="padding: 4px 12px;" onclick="demoAlert('Удалить ДЗ')">🗑 Удал.</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`
+                }
+            `;
+        }
+
+        function renderStudentMain(user) {
+            const groups = loadGroups();
+            const studentGroups = groups.filter(g => g.students?.includes(user.username)).map(g => g.name);
+            const homework = loadHomework().filter(h => studentGroups.includes(h.group));
+            const grades = loadGrades().filter(g => g.student === user.username);
+            return `
+                <div class="panel-header">
+                    <h2>Мой дневник</h2>
+                    <span class="restriction-tag"><i class="fas fa-eye"></i> только свои данные</span>
+                </div>
+
+                <h3>Текущие ДЗ</h3>
+                ${homework.length === 0 ? 
+                    '<div class="empty-message">У вас пока нет домашних заданий.</div>' : 
+                    `<div class="grid-cards">
+                        ${homework.map(h => `
+                            <div class="hw-card">
+                                <div class="hw-title">${h.title}</div>
+                                <div class="hw-meta">
+                                    <span class="subject-badge ${h.subject === 'Английский' ? 'english' : 'russian'}">${h.subject}</span>
+                                    <span>⏰ ${h.deadline}</span>
+                                </div>
+                                <div class="hw-desc">${h.desc}</div>
+                                <div class="attachments">
+                                    ${h.attachments?.includes('file') ? '<i class="fas fa-file"></i>' : ''}
+                                    ${h.attachments?.includes('audio') ? '<i class="fas fa-headphones"></i>' : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`
+                }
+
+                <h3>Мои оценки</h3>
+                ${grades.length === 0 ? 
+                    '<div class="empty-message">У вас пока нет оценок.</div>' : 
+                    `<div class="grid-cards">
+                        ${grades.map(g => `
+                            <div class="grade-card">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="subject-badge ${g.subject === 'Английский' ? 'english' : 'russian'}">${g.subject}</span>
+                                    <span class="grade-value">${g.score}</span>
+                                </div>
+                                <div style="font-weight: 600; margin: 8px 0;">${g.test}</div>
+                                <div style="color:#6f8a9f;">📅 ${g.date}</div>
+                            </div>
+                        `).join('')}
+                    </div>`
+                }
+            `;
+        }
+
+        function renderProfile(user) {
+            return `
+                <div class="panel-header">
+                    <h2>Мой профиль</h2>
+                </div>
+                <div style="text-align: center;">
+                    <div class="profile-avatar-large" id="profileAvatar">
+                        ${user.avatar ? `<img src="${user.avatar}" alt="avatar">` : (user.name ? user.name[0] : user.username[0]).toUpperCase()}
+                    </div>
+                    <div class="file-input">
+                        <label for="avatarUpload" class="btn-ghost"><i class="fas fa-upload"></i> Загрузить новое фото</label>
+                        <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                    </div>
+                    <p><strong>Имя пользователя:</strong> @${user.username} (нельзя изменить)</p>
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>Роль:</strong> ${user.role}</p>
+
+                    <h3 style="margin-top: 30px;">Смена пароля</h3>
+                    <div class="password-form">
+                        <input type="password" class="auth-input" id="oldPassword" placeholder="Старый пароль">
+                        <input type="password" class="auth-input" id="newPassword" placeholder="Новый пароль">
+                        <input type="password" class="auth-input" id="newPasswordConfirm" placeholder="Подтвердите новый пароль">
+                        <button class="btn-primary" id="changePasswordBtn">Изменить пароль</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ================== Обработчики событий для авторизованной зоны ==================
+        function attachAppListeners(user) {
+            // Клик по аватару/имени тоже переключает на профиль
+            document.getElementById('profileClick').addEventListener('click', () => {
+                currentMode = 'profile';
+                renderApp(user);
+            });
+
+            // Клик по пункту "Профиль" в меню
+            document.getElementById('profileNav').addEventListener('click', () => {
+                currentMode = 'profile';
+                renderApp(user);
+            });
+
+            // Клик по основному пункту меню (если есть)
+            const navMain = document.getElementById('navMain');
+            if (navMain) {
+                navMain.addEventListener('click', () => {
+                    currentMode = 'main';
+                    renderApp(user);
+                });
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    clearCurrentUser();
+                    renderAuth();
+                });
+            }
+
+            // Загрузка аватара
+            const avatarUpload = document.getElementById('avatarUpload');
+            if (avatarUpload) {
+                avatarUpload.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            user.avatar = ev.target.result;
+                            const users = loadUsers();
+                            const index = users.findIndex(u => u.username === user.username);
+                            if (index !== -1) {
+                                users[index].avatar = ev.target.result;
+                                saveUsers(users);
+                                setCurrentUser(user);
+                                renderApp(user); // обновим отображение
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Смена пароля
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            if (changePasswordBtn) {
+                changePasswordBtn.addEventListener('click', () => {
+                    const old = document.getElementById('oldPassword').value;
+                    const newPass = document.getElementById('newPassword').value;
+                    const confirm = document.getElementById('newPasswordConfirm').value;
+
+                    if (!old || !newPass || !confirm) return alert('Заполните все поля');
+                    if (newPass !== confirm) return alert('Новый пароль и подтверждение не совпадают');
+                    
+                    const users = loadUsers();
+                    const current = users.find(u => u.username === user.username);
+                    if (current.password !== old) return alert('Старый пароль неверен');
+
+                    current.password = newPass;
+                    saveUsers(users);
+                    user.password = newPass; // обновим в текущей сессии
+                    setCurrentUser(user);
+                    alert('Пароль успешно изменён');
+                    // Очистим поля
+                    document.getElementById('oldPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('newPasswordConfirm').value = '';
+                });
+            }
+
+            // Обработчики для супер-админа
+            if (user.role === 'super') {
+                document.getElementById('superAssignBtn')?.addEventListener('click', () => {
+                    const username = document.getElementById('superNewAdmin').value.trim();
+                    if (!username) return alert('Введите имя пользователя');
+                    const users = loadUsers();
+                    const targetUser = users.find(u => u.username === username);
+                    if (!targetUser) return alert('Пользователь не найден');
+                    if (targetUser.role === 'admin') return alert('Уже администратор');
+                    targetUser.role = 'admin';
+                    saveUsers(users);
+                    alert(`Пользователь @${username} теперь администратор`);
+                    renderApp(user);
+                });
+
+                window.editAdmin = (username) => {
+                    demoAlert(`Изменить права администратора @${username}`);
+                };
+                window.deleteAdmin = (username) => {
+                    const users = loadUsers();
+                    const index = users.findIndex(u => u.username === username);
+                    if (index !== -1 && users[index].role === 'admin') {
+                        users[index].role = 'student';
+                        saveUsers(users);
+                        alert(`Администратор @${username} удалён`);
+                        renderApp(user);
+                    }
+                };
+            }
+
+            // Обработчики для админа
+            if (user.role === 'admin') {
+                const groups = loadGroups();
+
+                document.getElementById('createGroupBtn')?.addEventListener('click', () => {
+                    const newId = groups.length ? Math.max(...groups.map(g => g.id)) + 1 : 1;
+                    const newGroup = {
+                        id: newId,
+                        name: 'Новая группа',
+                        language: 'Английский',
+                        teacher: null,
+                        studentsCount: 0,
+                        students: []
+                    };
+                    groups.push(newGroup);
+                    saveGroups(groups);
+                    renderApp(user);
+                });
+
+                document.getElementById('assignTeacherBtn')?.addEventListener('click', () => {
+                    const groupId = parseInt(document.getElementById('adminGroupSelect').value);
+                    const teacherUsername = document.getElementById('adminTeacherName').value.trim();
+                    if (!teacherUsername) return alert('Введите username учителя');
+                    const users = loadUsers();
+                    const teacher = users.find(u => u.username === teacherUsername && u.role === 'teacher');
+                    if (!teacher) return alert('Учитель с таким username не найден');
+                    const group = groups.find(g => g.id === groupId);
+                    if (group) {
+                        group.teacher = teacherUsername;
+                        saveGroups(groups);
+                        alert(`Учитель @${teacherUsername} назначен на группу ${group.name}`);
+                        renderApp(user);
+                    }
+                });
+
+                window.startEdit = (id, currentName) => {
+                    editingGroupId = id;
+                    editValue = currentName;
+                    renderApp(user);
+                };
+                window.cancelEdit = () => {
+                    editingGroupId = null;
+                    editValue = '';
+                    renderApp(user);
+                };
+                window.saveGroupName = (id) => {
+                    const input = document.getElementById(`editInput_${id}`);
+                    if (input) {
+                        const newName = input.value.trim();
+                        if (newName) {
+                            const group = groups.find(g => g.id === id);
+                            if (group) group.name = newName;
+                            saveGroups(groups);
+                        }
+                    }
+                    editingGroupId = null;
+                    editValue = '';
+                    renderApp(user);
+                };
+                window.deleteGroup = (id) => {
+                    if (confirm('Удалить группу?')) {
+                        const index = groups.findIndex(g => g.id === id);
+                        if (index !== -1) {
+                            groups.splice(index, 1);
+                            saveGroups(groups);
+                            renderApp(user);
+                        }
+                    }
+                };
+                window.unassignTeacher = (id) => {
+                    const group = groups.find(g => g.id === id);
+                    if (group) {
+                        group.teacher = null;
+                        saveGroups(groups);
+                        renderApp(user);
+                    }
+                };
+            }
+
+            // Обработчики для учителя
+            if (user.role === 'teacher') {
+                document.getElementById('createHwBtn')?.addEventListener('click', () => demoAlert('Создать домашнее задание'));
+                document.getElementById('setGradeBtn')?.addEventListener('click', () => demoAlert('Поставить оценку'));
+                document.getElementById('addStudentBtn')?.addEventListener('click', () => {
+                    const groupId = parseInt(document.getElementById('teacherGroupSelect').value);
+                    const studentUsername = document.getElementById('teacherStudentName').value.trim();
+                    if (!studentUsername) return alert('Введите username ученика');
+                    const users = loadUsers();
+                    const student = users.find(u => u.username === studentUsername && u.role === 'student');
+                    if (!student) return alert('Ученик с таким username не найден');
+                    const groups = loadGroups();
+                    const group = groups.find(g => g.id === groupId);
+                    if (group) {
+                        if (!group.students) group.students = [];
+                        if (!group.students.includes(studentUsername)) {
+                            group.students.push(studentUsername);
+                            group.studentsCount = group.students.length;
+                            saveGroups(groups);
+                            alert(`Ученик @${studentUsername} добавлен в группу ${group.name}`);
+                        } else {
+                            alert('Ученик уже в группе');
+                        }
+                    }
+                });
+            }
+        }
+
+        // ================== Рендеринг аутентификации ==================
+        function renderAuth() {
+            const container = document.getElementById('appContainer');
+            container.innerHTML = `
+                <div class="auth-container">
+                    <div class="auth-tabs">
+                        <div class="auth-tab active" id="loginTab">Вход</div>
+                        <div class="auth-tab" id="registerTab">Регистрация</div>
+                    </div>
+                    <div id="loginForm" class="auth-form">
+                        <input type="text" class="auth-input" id="loginUsername" placeholder="Имя пользователя или email">
+                        <input type="password" class="auth-input" id="loginPassword" placeholder="Пароль">
+                        <div class="forgot-password" id="forgotPasswordLink">Забыли пароль?</div>
+                        <button class="auth-btn" id="loginBtn">Войти</button>
+                        <button class="auth-btn auth-btn-google" id="googleLoginBtn"><i class="fab fa-google"></i> Войти через Google</button>
+                    </div>
+                    <div id="registerForm" class="auth-form hidden">
+                        <input type="text" class="auth-input" id="regUsername" placeholder="Имя пользователя (нельзя изменить позже)">
+                        <input type="email" class="auth-input" id="regEmail" placeholder="Email">
+                        <input type="password" class="auth-input" id="regPassword" placeholder="Пароль">
+                        <input type="password" class="auth-input" id="regPasswordConfirm" placeholder="Подтверждение пароля">
+                        <button class="auth-btn" id="registerBtn">Зарегистрироваться</button>
+                        <button class="auth-btn auth-btn-google" id="googleRegisterBtn"><i class="fab fa-google"></i> Зарегистрироваться через Google</button>
+                        <div style="font-size:0.8rem; color:#888; margin-top:8px;">* Имя пользователя после регистрации изменить нельзя</div>
+                    </div>
+                    <div id="resetForm" class="auth-form hidden">
+                        <h3>Сброс пароля</h3>
+                        <input type="email" class="auth-input" id="resetEmail" placeholder="Ваш email">
+                        <button class="auth-btn" id="sendResetCodeBtn">Отправить код</button>
+                        <div class="auth-link" id="backToLoginLink">← Вернуться ко входу</div>
+                    </div>
+                    <div id="resetCodeForm" class="auth-form hidden">
+                        <h3>Введите код из email</h3>
+                        <input type="text" class="auth-input" id="resetCode" placeholder="6-значный код">
+                        <input type="password" class="auth-input" id="newPassword" placeholder="Новый пароль">
+                        <input type="password" class="auth-input" id="newPasswordConfirm" placeholder="Подтвердите пароль">
+                        <button class="auth-btn" id="resetPasswordBtn">Изменить пароль</button>
+                        <div class="auth-link" id="backToResetLink">← Назад</div>
+                    </div>
+                </div>
+            `;
+            attachAuthListeners();
+        }
+
+        // ================== Обработчики аутентификации ==================
+        function attachAuthListeners() {
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const resetForm = document.getElementById('resetForm');
+            const resetCodeForm = document.getElementById('resetCodeForm');
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            const backToLogin = document.getElementById('backToLoginLink');
+            const backToReset = document.getElementById('backToResetLink');
+
+            let resetEmailTemp = '';
+
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                resetForm.classList.add('hidden');
+                resetCodeForm.classList.add('hidden');
+            });
+
+            registerTab.addEventListener('click', () => {
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                resetForm.classList.add('hidden');
+                resetCodeForm.classList.add('hidden');
+            });
+
+            forgotLink.addEventListener('click', () => {
+                loginForm.classList.add('hidden');
+                resetForm.classList.remove('hidden');
+            });
+
+            backToLogin.addEventListener('click', () => {
+                resetForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            });
+
+            backToReset?.addEventListener('click', () => {
+                resetCodeForm.classList.add('hidden');
+                resetForm.classList.remove('hidden');
+            });
+
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                const usernameOrEmail = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                const users = loadUsers();
+                const user = users.find(u => (u.username === usernameOrEmail || u.email === usernameOrEmail) && u.password === password);
+                if (user) {
+                    setCurrentUser(user);
+                    currentMode = 'main'; // сбрасываем на главную
+                    renderApp(user);
+                } else {
+                    alert('Неверное имя пользователя/email или пароль');
+                }
+            });
+
+            document.getElementById('registerBtn').addEventListener('click', () => {
+                const username = document.getElementById('regUsername').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const password = document.getElementById('regPassword').value;
+                const confirm = document.getElementById('regPasswordConfirm').value;
+
+                if (!username || !email || !password) return alert('Заполните все поля');
+                if (password !== confirm) return alert('Пароли не совпадают');
+                const users = loadUsers();
+                if (users.some(u => u.username === username)) return alert('Имя пользователя уже занято');
+                if (users.some(u => u.email === email)) return alert('Email уже зарегистрирован');
+
+                const newUser = {
+                    username,
+                    email,
+                    password,
+                    role: 'student',
+                    name: username,
+                    avatar: null
+                };
+                users.push(newUser);
+                saveUsers(users);
+                alert('Регистрация успешна! Теперь вы можете войти.');
+                loginTab.click();
+            });
+
+            document.getElementById('googleLoginBtn')?.addEventListener('click', () => demoAlert('Вход через Google (демо)'));
+            document.getElementById('googleRegisterBtn')?.addEventListener('click', () => demoAlert('Регистрация через Google (демо)'));
+
+            document.getElementById('sendResetCodeBtn').addEventListener('click', () => {
+                const email = document.getElementById('resetEmail').value.trim();
+                if (!email) return alert('Введите email');
+                const users = loadUsers();
+                const user = users.find(u => u.email === email);
+                if (!user) return alert('Пользователь с таким email не найден');
+
+                const code = Math.floor(100000 + Math.random() * 900000).toString();
+                resetCodes[email] = code;
+                resetEmailTemp = email;
+                alert(`Ваш код подтверждения: ${code} (в реальном приложении будет отправлен на email)`);
+
+                resetForm.classList.add('hidden');
+                resetCodeForm.classList.remove('hidden');
+            });
+
+            document.getElementById('resetPasswordBtn').addEventListener('click', () => {
+                const code = document.getElementById('resetCode').value.trim();
+                const newPass = document.getElementById('newPassword').value;
+                const confirmPass = document.getElementById('newPasswordConfirm').value;
+
+                if (!code || !newPass || !confirmPass) return alert('Заполните все поля');
+                if (newPass !== confirmPass) return alert('Пароли не совпадают');
+                if (resetCodes[resetEmailTemp] !== code) return alert('Неверный код');
+
+                const users = loadUsers();
+                const user = users.find(u => u.email === resetEmailTemp);
+                if (user) {
+                    user.password = newPass;
+                    saveUsers(users);
+                    alert('Пароль успешно изменён! Теперь вы можете войти.');
+                    delete resetCodes[resetEmailTemp];
+                    resetCodeForm.classList.add('hidden');
+                    loginForm.classList.remove('hidden');
+                }
+            });
+        }
+
+        // Хранилище кодов сброса
+        let resetCodes = {};
+
+        // Старт
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            renderApp(currentUser);
+        } else {
+            renderAuth();
+        }
+    })();
+</script>
 </body>
-</html>
+    </html>
